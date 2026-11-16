@@ -1,0 +1,62 @@
+# =============================================================================
+# .htaccess — Fontella & Ribeiro Advogados (versão PHP + MySQL)
+# =============================================================================
+
+# Página padrão
+DirectoryIndex index.html
+
+# Impede listagem de diretórios (segurança)
+Options -Indexes
+
+# Impede acesso direto a arquivos sensíveis do projeto
+<FilesMatch "^(README\.md|\.gitignore|schema\.sql)$">
+  Require all denied
+</FilesMatch>
+
+# -----------------------------------------------------------------------
+# Protege a pasta database/ inteira (contém o schema.sql com a estrutura
+# do banco). Ninguém deve conseguir baixar esse arquivo pelo navegador.
+# -----------------------------------------------------------------------
+<IfModule mod_alias.c>
+  RedirectMatch 403 ^/database/.*$
+</IfModule>
+
+# -----------------------------------------------------------------------
+# HTTPS (opcional): descomente as linhas abaixo se o seu domínio já
+# possui certificado SSL configurado, para forçar conexões seguras.
+# Importante para a versão PHP: o cookie de sessão do admin deve
+# trafegar apenas por HTTPS em produção.
+# -----------------------------------------------------------------------
+# RewriteEngine On
+# RewriteCond %{HTTPS} off
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# -----------------------------------------------------------------------
+# A Área Administrativa usa rota por hash (ex.: /#admin), tratada 100% no
+# navegador pelo React — por isso não é necessário reescrever URLs no
+# servidor para a página em si. As chamadas de API (api/*.php) são
+# arquivos PHP reais e são executadas normalmente pelo Apache/mod_php.
+# -----------------------------------------------------------------------
+
+# Compressão Gzip (acelera o carregamento em conexões remotas)
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/javascript
+  AddOutputFilterByType DEFLATE application/javascript application/json
+  AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
+
+# Cache do navegador para arquivos estáticos (NÃO aplicado a .php)
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css "access plus 7 days"
+  ExpiresByType application/javascript "access plus 7 days"
+  ExpiresByType image/jpeg "access plus 30 days"
+  ExpiresByType image/png "access plus 30 days"
+  ExpiresByType image/webp "access plus 30 days"
+</IfModule>
+
+# Charset padrão
+AddDefaultCharset UTF-8
+
+# Página de erro 404 customizada (opcional — crie 404.html se desejar)
+# ErrorDocument 404 /404.html
